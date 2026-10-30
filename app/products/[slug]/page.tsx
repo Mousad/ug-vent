@@ -19,7 +19,6 @@ import {
 } from "@/data/products";
 
 import { categoryImages } from "@/data/category-images";
-
 import { Shell } from "@/components/site";
 
 export function generateStaticParams() {
@@ -47,6 +46,25 @@ export default async function CategoryPage({
   const c = getCategory((await params).slug);
 
   if (!c) notFound();
+
+  // حماية البيانات من القيم غير الموجودة
+  const products = c.products ?? [];
+  const features = c.features ?? [];
+  const applications = c.applications ?? [];
+
+  // إنشاء أعمدة تلقائية إذا لم تكن columns موجودة
+  const maxValuesLength = Math.max(
+    0,
+    ...products.map((p) => p.values?.length ?? 0)
+  );
+
+  const columns =
+    c.columns?.length > 0
+      ? c.columns
+      : Array.from(
+          { length: maxValuesLength },
+          (_, index) => `المواصفة ${index + 1}`
+        );
 
   return (
     <Shell>
@@ -193,7 +211,7 @@ export default async function CategoryPage({
             </h2>
 
             <ul className="mt-5 flex flex-col gap-4">
-              {c.features.map((x) => (
+              {features.map((x) => (
                 <li
                   key={x}
                   className="flex gap-3 text-sm leading-6"
@@ -216,7 +234,7 @@ export default async function CategoryPage({
               </p>
 
               <div className="mt-3 flex flex-wrap gap-2">
-                {c.applications.map((x) => (
+                {applications.map((x) => (
                   <span
                     className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-[#0B3C6F]"
                     key={x}
@@ -294,10 +312,10 @@ export default async function CategoryPage({
                     Model
                   </th>
 
-                  {c.columns.map((col) => (
+                  {columns.map((col, index) => (
                     <th
                       className="sticky top-0 z-10 whitespace-nowrap bg-[#0B3C6F] px-4 py-4 text-white"
-                      key={col}
+                      key={`${col}-${index}`}
                     >
                       {col}
                     </th>
@@ -310,7 +328,7 @@ export default async function CategoryPage({
               </thead>
 
               <tbody>
-                {c.products.map((p) => {
+                {products.map((p) => {
                   const productHref = `/products/item/${c.slug}--${imageSlug(p.model)}`;
 
                   return (
@@ -318,7 +336,6 @@ export default async function CategoryPage({
                       className="border-t bg-white transition even:bg-slate-50 hover:bg-blue-50"
                       key={p.model}
                     >
-                      {/* اسم الموديل يفتح صفحة تفاصيل المنتج */}
                       <td className="sticky right-0 whitespace-nowrap bg-inherit px-4 py-4 font-black text-[#0B3C6F]">
                         <Link
                           href={productHref}
@@ -330,16 +347,15 @@ export default async function CategoryPage({
                         </Link>
                       </td>
 
-                      {p.values.map((v, i) => (
+                      {columns.map((_, i) => (
                         <td
                           className="whitespace-nowrap px-4 py-4 text-slate-600"
                           key={i}
                         >
-                          {v}
+                          {p.values?.[i] ?? "—"}
                         </td>
                       ))}
 
-                      {/* أزرار المنتج */}
                       <td className="px-4 py-4">
                         <div className="flex items-center gap-2">
                           <Link
@@ -360,6 +376,17 @@ export default async function CategoryPage({
                     </tr>
                   );
                 })}
+
+                {products.length === 0 && (
+                  <tr>
+                    <td
+                      colSpan={columns.length + 2}
+                      className="px-4 py-10 text-center text-slate-500"
+                    >
+                      لا توجد منتجات متاحة حالياً في هذه الفئة.
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
