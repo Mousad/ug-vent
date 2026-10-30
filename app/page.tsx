@@ -179,97 +179,108 @@ export default function Home() {
 
 
       {/* ═══════════════ 3. PRODUCTS ═══════════════ */}
-      <section className="container py-16 sm:py-20 lg:py-24">
-        <SectionTitle
-          eyebrow="حلولنا"
-          title="كل ما تحتاجه لحركة هواء آمنة وفعالة"
-          description="تعرّف على مجموعة معدات التهوية الصناعية وشفط الدخان، واختر الفئة الأقرب إلى متطلبات مشروعك."
+    
+     
+{/* ═══════════════ 3. PRODUCT GROUPS ═══════════════ */}
+<section className="bg-[#F5F8FC] py-10 sm:py-20 lg:py-24">
+  <div className="container">
+    <SectionTitle
+      eyebrow="حلولنا"
+      title="استكشف حلول التهوية لدينا"
+      description="حلول متخصصة للمشروعات الصناعية والتجارية."
+    />
+
+    <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:gap-8">
+
+      {/* INDUSTRIAL */}
+      <Link
+        href="/products/group/industrial"
+        className="group relative isolate flex min-h-[280px] flex-col justify-end overflow-hidden rounded-xl bg-[#061B30] text-white shadow-md transition duration-500 hover:-translate-y-1 hover:shadow-xl sm:min-h-[460px] sm:rounded-2xl"
+      >
+        <img
+          src="https://i.pinimg.com/736x/c2/97/09/c297096f81c47ced73a2d192a60acedb.jpg"
+          alt="أنظمة ومراوح التهوية الصناعية"
+          loading="lazy"
+          className="absolute inset-0 -z-20 size-full object-cover transition duration-700 group-hover:scale-105"
         />
 
-        <div className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-4 [scrollbar-width:none] sm:mx-0 sm:grid sm:grid-cols-2 sm:gap-5 sm:overflow-visible sm:px-0 sm:pb-0 lg:grid-cols-3 [&::-webkit-scrollbar]:hidden">
-          {categories.slice(0, 6).map((category, index) => {
-            const Icon = productIcons[index % productIcons.length];
-            const image = images[category.slug];
-            const tags = badges[category.slug] ?? [];
+        <div className="absolute inset-0 -z-10 bg-gradient-to-t from-[#061B30] via-[#061B30]/65 to-[#061B30]/10" />
 
-            return (
-              <Link
-                key={category.slug}
-                href={"/products/" + category.slug}
-                className="group flex w-[82%] shrink-0 snap-center flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl hover:shadow-blue-900/10 sm:w-auto"
-              >
-                <div className="relative aspect-[16/12] overflow-hidden bg-[#F4F7FA]">
-                  {image ? (
-                    <img
-                      src={image}
-                      alt={category.title}
-                      loading="lazy"
-                      className="size-full object-cover transition duration-500 group-hover:scale-105"
-                    />
-                  ) : (
-                    <>
-                      <div
-                        aria-hidden="true"
-                        className="absolute inset-0 opacity-60"
-                        style={{
-                          backgroundImage:
-                            "linear-gradient(#2f80ed1f 1px,transparent 1px),linear-gradient(90deg,#2f80ed1f 1px,transparent 1px)",
-                          backgroundSize: "26px 26px",
-                        }}
-                      />
-                      <div className="absolute inset-0 grid place-items-center">
-                        <Icon className="size-20 text-[#2F80ED]/80 sm:size-24" strokeWidth={1} />
-                      </div>
-                    </>
-                  )}
-
-                  <span className="absolute right-4 top-4 grid size-10 place-items-center rounded-xl bg-white text-[#2F80ED] shadow-md transition group-hover:bg-[#2F80ED] group-hover:text-white">
-                    <Icon className="size-5" strokeWidth={1.8} />
-                  </span>
-                </div>
-
-                <div className="flex flex-1 flex-col p-5">
-                  <h3 className="text-lg font-black text-[#0B3C6F] sm:text-xl">
-                    {category.title}
-                  </h3>
-
-                  <p className="mt-2 text-sm leading-7 text-slate-500">
-                    {category.description}
-                  </p>
-
-                  {tags.length > 0 && (
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      {tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="rounded-full bg-blue-50 px-3 py-1 text-[11px] font-bold text-[#2F80ED]"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-
-                  <span className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-[#0B3C6F] transition group-hover:text-[#2F80ED]">
-                    استكشف المنتجات
-                    <ArrowLeft className="size-4 transition group-hover:-translate-x-1" />
-                  </span>
-                </div>
-              </Link>
-            );
-          })}
+        <div className="absolute right-2.5 top-2.5 grid size-8 place-items-center rounded-lg border border-white/20 bg-white/15 backdrop-blur sm:right-5 sm:top-5 sm:size-12 sm:rounded-xl">
+          <Factory className="size-4 sm:size-6" />
         </div>
 
-        <div className="mt-9 text-center sm:mt-10">
-          <Link
-            href="/products"
-            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-[#0B3C6F] px-7 py-3 text-sm font-bold text-[#0B3C6F] transition hover:bg-[#0B3C6F] hover:text-white"
-          >
-            عرض كل المنتجات
-            <ArrowLeft className="size-4" />
-          </Link>
+        <div className="p-3 sm:p-9">
+          <span className="text-[8px] font-bold uppercase tracking-wider text-red-300 sm:text-xs sm:tracking-[0.2em]">
+            Industrial
+          </span>
+
+          <h3 className="mt-2 text-sm font-black leading-relaxed sm:mt-3 sm:text-3xl lg:text-4xl">
+            التهوية الصناعية
+          </h3>
+
+          <p className="mt-2 text-[10px] leading-5 text-blue-100 sm:mt-4 sm:max-w-md sm:text-sm sm:leading-8">
+            حلول متخصصة للمصانع والمنشآت الصناعية والمخازن.
+          </p>
+
+          <div className="mt-3 flex items-center justify-between gap-1 border-t border-white/20 pt-3 sm:mt-6 sm:pt-5">
+            <span className="text-[10px] font-bold sm:text-sm">
+              استكشف الحلول
+            </span>
+            <span className="grid size-7 shrink-0 place-items-center rounded-full bg-[#D9252A] transition group-hover:bg-white group-hover:text-[#0B3C6F] sm:size-10">
+              <ArrowLeft className="size-3.5 sm:size-5 transition group-hover:-translate-x-1" />
+            </span>
+          </div>
         </div>
-      </section>
+      </Link>
+
+      {/* COMMERCIAL */}
+      <Link
+       href="/products/group/commercial"
+        className="group relative isolate flex min-h-[280px] flex-col justify-end overflow-hidden rounded-xl bg-[#061B30] text-white shadow-md transition duration-500 hover:-translate-y-1 hover:shadow-xl sm:min-h-[460px] sm:rounded-2xl"
+      >
+        <img
+          src="https://supplyworldco.com/wp-content/uploads/2024/11/%D8%AA%D8%B1%D9%83%D9%8A%D8%A8-%D8%A7%D9%84%D9%88%D8%AD%D8%AF%D8%A7%D8%AA-%D8%A7%D9%84%D8%B1%D8%A6%D9%8A%D8%B3%D9%8A%D8%A9-1024x585.jpg"
+          alt="أنظمة التهوية التجارية"
+          loading="lazy"
+          className="absolute inset-0 -z-20 size-full object-cover transition duration-700 group-hover:scale-105"
+        />
+
+        <div className="absolute inset-0 -z-10 bg-gradient-to-t from-[#061B30] via-[#061B30]/65 to-[#061B30]/10" />
+
+        <div className="absolute right-2.5 top-2.5 grid size-8 place-items-center rounded-lg border border-white/20 bg-white/15 backdrop-blur sm:right-5 sm:top-5 sm:size-12 sm:rounded-xl">
+          <Building2 className="size-4 sm:size-6" />
+        </div>
+
+        <div className="p-3 sm:p-9">
+          <span className="text-[8px] font-bold uppercase tracking-wider text-blue-200 sm:text-xs sm:tracking-[0.2em]">
+            Commercial
+          </span>
+
+          <h3 className="mt-2 text-sm font-black leading-relaxed sm:mt-3 sm:text-3xl lg:text-4xl">
+            التهوية التجارية
+          </h3>
+
+          <p className="mt-2 text-[10px] leading-5 text-blue-100 sm:mt-4 sm:max-w-md sm:text-sm sm:leading-8">
+            حلول متكاملة للمباني والمنشآت التجارية والمطاعم.
+          </p>
+
+          <div className="mt-3 flex items-center justify-between gap-1 border-t border-white/20 pt-3 sm:mt-6 sm:pt-5">
+            <span className="text-[10px] font-bold sm:text-sm">
+              استكشف الحلول
+            </span>
+            <span className="grid size-7 shrink-0 place-items-center rounded-full bg-[#2F80ED] transition group-hover:bg-white group-hover:text-[#0B3C6F] sm:size-10">
+              <ArrowLeft className="size-3.5 sm:size-5 transition group-hover:-translate-x-1" />
+            </span>
+          </div>
+        </div>
+      </Link>
+
+    </div>
+  </div>
+</section>
+
+
 
       {/* ═══════════════ 4. ABOUT US ═══════════════ */}
       <section className="overflow-hidden bg-[#F4F7FB] py-16 sm:py-20 lg:py-24">

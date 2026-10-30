@@ -325,12 +325,12 @@ export function Header() {
       {/* النافبار العلوي */}
       <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/95 shadow-sm backdrop-blur-xl">
         {/* الموبايل */}
-        <div className="flex h-[68px] items-center justify-center px-4 lg:hidden">
+        <div className="flex h-[45px] items-center justify-center px-2 lg:hidden">
           <Logo />
         </div>
 
         {/* الكمبيوتر */}
-        <div className="mx-auto hidden h-20 max-w-7xl items-center justify-between px-5 lg:flex">
+        <div className="mx-auto hidden h-16 max-w-7xl items-center justify-between px-5 lg:flex">
           <Logo />
 
           <nav className="flex items-center gap-5 xl:gap-6">
@@ -475,19 +475,7 @@ export function Footer() {
   );
 }
 
-export function WhatsApp() {
-  return (
-    <a
-      aria-label="تواصل معنا عبر واتساب"
-      href="https://wa.me/201228404000"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="fixed bottom-24 left-4 z-30 grid size-12 place-items-center rounded-full bg-[#25D366] text-white shadow-xl transition-all duration-300 hover:scale-110 hover:bg-[#20BA5A] sm:left-5 sm:size-14 lg:bottom-5"
-    >
-      <FaWhatsapp className="size-7 sm:size-8" />
-    </a>
-  );
-}
+
 
 export function Shell({
   children,
@@ -498,7 +486,7 @@ export function Shell({
     <>
       <Header />
       <main className="pb-24 lg:pb-0">{children}</main>
-      <WhatsApp />
+      {/* <WhatsApp /> */}
       <Footer />
     </>
   );

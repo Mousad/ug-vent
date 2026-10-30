@@ -19,7 +19,7 @@ import {
   SlidersHorizontal,
   X,
 } from "lucide-react";
-
+import ProductGroups from "@/components/product-groups";
 import { Shell } from "@/components/site";
 import { categories } from "@/data/products";
 
@@ -139,6 +139,9 @@ export default function Products() {
           </div>
         </section>
 
+        <ProductGroups />
+
+
         {/* البحث والفلاتر */}
         <section className="mx-auto max-w-7xl px-4 pt-7 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5 lg:flex-row lg:items-center lg:justify-between">
@@ -187,6 +190,9 @@ export default function Products() {
             </div>
           </div>
         </section>
+
+        {/* ═══════════════ 3. PRODUCT GROUPS ═══════════════ */}
+
 
         {/* بطاقات الفئات */}
         <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
