@@ -1,142 +1,534 @@
 
+"use client";
+
+import { useMemo, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
+
 import {
   ArrowLeft,
-  Factory,
-  Building2,
+  ArrowRight,
+  ChevronDown,
   Fan,
-  Wind,
-  ShieldCheck,
-  Layers3,
+  MessageCircle,
+  Search,
+  X,
 } from "lucide-react";
 
-import { groups, categoriesOf } from "@/data/products";
+import { categories, imageSlug } from "@/data/products";
+import type { Category } from "@/data/products";
 
-const groupStyles = {
-  industrial: {
-    image: "/categories/industrial.jpg",
-    icon: Factory,
-    accent: "#D9252A",
-    features: [
-      { icon: Fan, label: "مراوح صناعية" },
-      { icon: Wind, label: "أنظمة شفط الدخان" },
-      { icon: ShieldCheck, label: "حلول للمنشآت الكبيرة" },
-    ],
-  },
-  commercial: {
-    image: "/categories/commercial.jpg",
-    icon: Building2,
-    accent: "#2F80ED",
-    features: [
-      { icon: Wind, label: "مراوح مجاري الهواء" },
-      { icon: Building2, label: "تهوية المباني" },
-      { icon: Layers3, label: "وحدات التهوية" },
-    ],
-  },
+const PAGE_SIZE = 12;
+const WHATSAPP_NUMBER = "201008404000";
+
+type ProductItem = Category["products"][number] & {
+  categorySlug: string;
+  categoryTitle: string;
+  categoryEn: string;
 };
 
-type ProductGroupsProps = {
-  compact?: boolean;
-};
+export default function ProductGroups() {
+  const [search, setSearch] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [selectedProduct, setSelectedProduct] =
+    useState<ProductItem | null>(null);
 
-export default function ProductGroups({
-  compact = false,
-}: ProductGroupsProps) {
+  // تجميع جميع المنتجات من كل الفئات
+  const allProducts = useMemo<ProductItem[]>(() => {
+    return categories.flatMap((category) =>
+      category.products.map((product) => ({
+        ...product,
+        categorySlug: category.slug,
+        categoryTitle: category.title,
+        categoryEn: category.en,
+      }))
+    );
+  }, []);
+
+  // البحث والفلترة
+  const filteredProducts = useMemo(() => {
+    const query = search.trim().toLowerCase();
+
+    return allProducts.filter((product) => {
+      const matchesSearch =
+        !query ||
+        product.model.toLowerCase().includes(query) ||
+        product.desc.toLowerCase().includes(query) ||
+        product.categoryTitle.toLowerCase().includes(query) ||
+        product.categoryEn.toLowerCase().includes(query);
+
+      const matchesCategory =
+        selectedCategory === "all" ||
+        product.categorySlug === selectedCategory;
+
+      return matchesSearch && matchesCategory;
+    });
+  }, [allProducts, search, selectedCategory]);
+
+  // ترقيم الصفحات
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredProducts.length / PAGE_SIZE)
+  );
+
+  const safePage = Math.min(currentPage, totalPages);
+
+  const paginatedProducts = filteredProducts.slice(
+    (safePage - 1) * PAGE_SIZE,
+    safePage * PAGE_SIZE
+  );
+
+  function getProductHref(product: ProductItem) {
+    return `/products/${product.categorySlug}--${imageSlug(
+      product.model
+    )}`;
+  }
+
+  function getWhatsAppHref(product: ProductItem) {
+    const message = `مرحباً، أرغب في طلب المنتج التالي من UG VENT:
+
+الموديل: ${product.model}
+الفئة: ${product.categoryTitle}
+الوصف: ${product.desc}
+${product.flow ? `تدفق الهواء: ${product.flow}` : ""}
+${product.extra ? `المواصفات: ${product.extra}` : ""}
+
+يرجى تزويدي بالسعر والتفاصيل وطريقة الطلب.`;
+
+    return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
+      message
+    )}`;
+  }
+
+  function openProduct(product: ProductItem) {
+    setSelectedProduct(product);
+  }
+
+  function closeProduct() {
+    setSelectedProduct(null);
+  }
+
+  function updateSearch(value: string) {
+    setSearch(value);
+    setCurrentPage(1);
+  }
+
+  function updateCategory(value: string) {
+    setSelectedCategory(value);
+    setCurrentPage(1);
+  }
+
+  function clearFilters() {
+    setSearch("");
+    setSelectedCategory("all");
+    setCurrentPage(1);
+  }
+
   return (
-    <section className="container py-14 sm:py-20">
-      <div className="mx-auto mb-8 max-w-3xl text-center sm:mb-12">
-        <span className="text-sm font-bold text-[#D9252A]">
-          حلولنا ومنتجاتنا
-        </span>
+    <>
+      <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
 
-        <h2 className="mt-3 text-2xl font-black leading-relaxed text-[#0B3C6F] sm:text-4xl">
-          اختر القسم المناسب لمشروعك
-        </h2>
+        {/* البحث والفلترة */}
+        <div className="mb-8 w-full">
+          <div className="flex items-end gap-2 sm:gap-3">
 
-        <p className="mt-3 text-sm leading-7 text-slate-500 sm:text-base sm:leading-8">
-          استكشف حلول التهوية الصناعية والتجارية، وتعرّف على الفئات
-          والمنتجات المتاحة لكل استخدام.
-        </p>
-      </div>
+            {/* البحث */}
+            <div className="min-w-0 flex-1">
+              <label
+                htmlFor="product-search"
+                className="mb-2 block text-xs font-bold text-[#102A49] sm:text-sm"
+              >
+                ابحث عن منتج
+              </label>
 
-      <div className="grid gap-5 md:grid-cols-2 md:gap-6">
-        {groups.map((group) => {
-          const style = groupStyles[group.id];
-          const Icon = style.icon;
-          const categoryCount = categoriesOf(group.id).length;
+              <div className="relative">
+                <Search
+                  size={18}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 sm:right-4"
+                />
 
-          return (
-            <Link
-              key={group.id}
-href={`/products/group/${group.id}`}
-              className="group relative isolate flex min-h-[340px] flex-col justify-between overflow-hidden rounded-2xl border border-slate-200 bg-[#061B30] p-6 text-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl sm:min-h-[390px] sm:rounded-3xl sm:p-9"
-            >
-              <div
-                aria-hidden="true"
-                className="absolute inset-0 -z-20 bg-cover bg-center transition duration-700 group-hover:scale-105"
-                style={{
-                  backgroundImage: `url("${style.image}")`,
-                }}
-              />
-
-              <div className="absolute inset-0 -z-10 bg-gradient-to-l from-[#061B30]/95 via-[#061B30]/80 to-[#061B30]/35" />
-
-              <div className="flex items-start justify-between gap-4">
-                <span
-                  className="grid size-14 place-items-center rounded-2xl border border-white/20 bg-white/10 backdrop-blur sm:size-16"
-                  style={{ color: style.accent }}
-                >
-                  <Icon className="size-7 sm:size-8" />
-                </span>
-
-                <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-bold text-white/90 backdrop-blur">
-                  {categoryCount} فئة
-                </span>
+                <input
+                  id="product-search"
+                  type="search"
+                  value={search}
+                  onChange={(event) =>
+                    updateSearch(event.target.value)
+                  }
+                  placeholder="ابحث باسم الموديل أو وصف المنتج..."
+                  className="h-12 w-full rounded-xl border border-slate-200 bg-white pr-11 pl-3 text-xs text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#2F80ED] focus:ring-2 focus:ring-blue-100 sm:h-14 sm:pr-12 sm:text-sm"
+                />
               </div>
+            </div>
 
-              <div className="mt-12">
-                <span
-                  className="text-xs font-bold uppercase tracking-[0.2em] sm:text-sm"
-                  style={{ color: style.accent }}
+            {/* فلتر الفئات */}
+            <div className="w-[112px] shrink-0 sm:w-[170px]">
+              <label
+                htmlFor="category-filter"
+                className="mb-2 block text-xs font-bold text-[#102A49] sm:text-sm"
+              >
+                الفئة
+              </label>
+
+              <div className="relative">
+                <select
+                  id="category-filter"
+                  value={selectedCategory}
+                  onChange={(event) =>
+                    updateCategory(event.target.value)
+                  }
+                  className="h-12 w-full appearance-none rounded-xl border border-slate-200 bg-white py-0 pr-3 pl-7 text-xs font-medium text-slate-700 outline-none transition focus:border-[#2F80ED] focus:ring-2 focus:ring-blue-100 sm:h-14 sm:pr-4 sm:pl-9 sm:text-sm"
                 >
-                  {group.en}
-                </span>
+                  <option value="all">الكل</option>
 
-                <h3 className="mt-2 text-2xl font-black sm:text-3xl">
-                  {group.title === "صناعي"
-                    ? "التهوية الصناعية"
-                    : "التهوية التجارية"}
-                </h3>
+                  {categories.map((category) => (
+                    <option
+                      key={category.slug}
+                      value={category.slug}
+                    >
+                      {category.title}
+                    </option>
+                  ))}
+                </select>
 
-                <p className="mt-3 max-w-lg text-sm leading-7 text-white/80 sm:text-base sm:leading-8">
-                  {group.description}
+                <ChevronDown
+                  size={14}
+                  className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-slate-400 sm:left-3"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* عدد النتائج ومسح الفلاتر */}
+          <div className="mt-3 flex items-center justify-between">
+            <p className="text-xs text-slate-500">
+              عدد المنتجات:
+              <span className="mr-1 font-black text-[#102A49]">
+                {filteredProducts.length}
+              </span>
+            </p>
+
+            {(search || selectedCategory !== "all") && (
+              <button
+                type="button"
+                onClick={clearFilters}
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-[#D9252A] transition hover:text-red-700"
+              >
+                <X size={14} />
+                مسح الفلاتر
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* عنوان المنتجات */}
+        <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p className="text-xs font-bold tracking-widest text-[#2F80ED]">
+              UG VENT PRODUCTS
+            </p>
+
+            <h2 className="mt-2 text-2xl font-black text-[#102A49]">
+              جميع المنتجات
+            </h2>
+          </div>
+
+          <p className="text-sm text-slate-500">
+            الصفحة {safePage} من {totalPages}
+          </p>
+        </div>
+
+        {/* شبكة المنتجات */}
+        {paginatedProducts.length > 0 ? (
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
+            {paginatedProducts.map((product, index) => (
+              <article
+                key={`${product.categorySlug}-${product.model}-${index}`}
+                className="group overflow-hidden rounded-2xl border border-slate-200 bg-white transition duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl"
+              >
+                <button
+                  type="button"
+                  onClick={() => openProduct(product)}
+                  aria-label={`معاينة المنتج ${product.model}`}
+                  className="block w-full text-right"
+                >
+                  {/* صورة المنتج */}
+                  <div className="relative flex h-40 items-center justify-center overflow-hidden bg-[#F5F7FA] p-3 sm:h-52 sm:p-5">
+                    <Image
+                      src={product.image}
+                      alt={product.model}
+                      fill
+                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 25vw"
+                      className="object-contain p-4 transition duration-500 group-hover:scale-105 sm:p-5"
+                    />
+
+                    <span className="absolute right-2 top-2 max-w-[85%] truncate rounded-full bg-white/95 px-2 py-1 text-[9px] font-bold text-[#2F80ED] shadow-sm sm:right-3 sm:top-3 sm:px-3 sm:text-[10px]">
+                      {product.categoryTitle}
+                    </span>
+                  </div>
+
+                  {/* بيانات المنتج */}
+                  <div className="p-3 sm:p-4">
+                    <h3 className="truncate text-sm font-black text-[#102A49] transition group-hover:text-[#2F80ED] sm:text-lg">
+                      {product.model}
+                    </h3>
+
+                    <p className="mt-2 line-clamp-2 min-h-10 text-[10px] leading-5 text-slate-500 sm:min-h-12 sm:text-xs sm:leading-6">
+                      {product.desc}
+                    </p>
+
+                    {product.flow && (
+                      <div className="mt-3 flex flex-col gap-1 border-t border-slate-100 pt-3 sm:mt-4 sm:flex-row sm:items-center sm:justify-between">
+                        <span className="text-[10px] text-slate-400 sm:text-xs">
+                          تدفق الهواء
+                        </span>
+
+                        <span className="text-[10px] font-bold text-[#102A49] sm:text-xs">
+                          {product.flow}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </button>
+
+                {/* زر المعاينة */}
+                <div className="px-3 pb-3 sm:px-4 sm:pb-4">
+                  <button
+                    type="button"
+                    onClick={() => openProduct(product)}
+                    className="flex min-h-9 w-full items-center justify-center gap-1 rounded-lg bg-slate-100 px-2 py-2 text-[10px] font-bold text-[#102A49] transition hover:bg-blue-50 hover:text-[#2F80ED] sm:min-h-10 sm:gap-2 sm:text-xs"
+                  >
+                    معاينة المنتج
+                    <ChevronDown size={14} />
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-2xl border border-dashed border-slate-300 bg-white px-5 py-16 text-center">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
+              <Fan size={27} />
+            </div>
+
+            <h3 className="mt-4 text-lg font-black text-[#102A49]">
+              لا توجد منتجات مطابقة
+            </h3>
+
+            <p className="mt-2 text-sm text-slate-500">
+              جرّب البحث باسم موديل آخر أو اختر فئة مختلفة.
+            </p>
+
+            <button
+              type="button"
+              onClick={clearFilters}
+              className="mt-5 rounded-xl bg-[#102A49] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#2F80ED]"
+            >
+              عرض كل المنتجات
+            </button>
+          </div>
+        )}
+
+        {/* ترقيم الصفحات */}
+        {totalPages > 1 && (
+          <nav
+            aria-label="ترقيم صفحات المنتجات"
+            className="mt-10 flex flex-wrap items-center justify-center gap-2"
+          >
+            <button
+              type="button"
+              disabled={safePage === 1}
+              onClick={() => {
+                setCurrentPage((page) =>
+                  Math.max(1, page - 1)
+                );
+                setSelectedProduct(null);
+              }}
+              className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:border-[#2F80ED] hover:text-[#2F80ED] disabled:cursor-not-allowed disabled:opacity-30"
+              aria-label="الصفحة السابقة"
+            >
+              <ArrowRight size={17} />
+            </button>
+
+            {Array.from(
+              { length: totalPages },
+              (_, index) => index + 1
+            ).map((page) => (
+              <button
+                key={page}
+                type="button"
+                onClick={() => {
+                  setCurrentPage(page);
+                  setSelectedProduct(null);
+                }}
+                aria-current={
+                  safePage === page ? "page" : undefined
+                }
+                className={`h-10 min-w-10 rounded-xl px-3 text-sm font-bold transition ${
+                  safePage === page
+                    ? "bg-[#102A49] text-white"
+                    : "border border-slate-200 bg-white text-slate-600 hover:border-[#2F80ED] hover:text-[#2F80ED]"
+                }`}
+              >
+                {page}
+              </button>
+            ))}
+
+            <button
+              type="button"
+              disabled={safePage === totalPages}
+              onClick={() => {
+                setCurrentPage((page) =>
+                  Math.min(totalPages, page + 1)
+                );
+                setSelectedProduct(null);
+              }}
+              className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:border-[#2F80ED] hover:text-[#2F80ED] disabled:cursor-not-allowed disabled:opacity-30"
+              aria-label="الصفحة التالية"
+            >
+              <ArrowLeft size={17} />
+            </button>
+          </nav>
+        )}
+
+        <div className="mt-5 text-center text-xs text-slate-400">
+          عرض {paginatedProducts.length} من أصل{" "}
+          {filteredProducts.length} منتج
+        </div>
+      </section>
+
+      {/* نافذة معاينة المنتج */}
+      {selectedProduct && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-[#061B30]/75 p-3 backdrop-blur-sm sm:p-6"
+          onClick={closeProduct}
+          role="presentation"
+        >
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="product-modal-title"
+            onClick={(event) => event.stopPropagation()}
+            className="relative max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-white shadow-2xl sm:rounded-3xl"
+          >
+            {/* رأس النافذة */}
+            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-100 bg-white/95 px-5 py-4 backdrop-blur">
+              <div>
+                <p className="text-[10px] font-bold tracking-widest text-[#2F80ED]">
+                  UG VENT / PRODUCT PREVIEW
                 </p>
 
-                {!compact && (
-                  <div className="mt-5 flex flex-wrap gap-x-4 gap-y-3">
-                    {style.features.map(({ icon: FeatureIcon, label }) => (
-                      <span
-                        key={label}
-                        className="inline-flex items-center gap-1.5 text-xs text-white/90 sm:text-sm"
-                      >
-                        <FeatureIcon className="size-4 shrink-0" />
-                        {label}
-                      </span>
-                    ))}
-                  </div>
-                )}
+                <h2 className="mt-1 text-base font-black text-[#102A49]">
+                  معاينة المنتج
+                </h2>
+              </div>
 
-                <span className="mt-7 inline-flex min-h-11 items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-bold text-white transition group-hover:gap-3"
-                  style={{ backgroundColor: style.accent }}
-                >
-                  استكشف الفئات
-                  <ArrowLeft className="size-4" />
+              <button
+                type="button"
+                onClick={closeProduct}
+                aria-label="إغلاق النافذة"
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition hover:bg-red-50 hover:text-red-600"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* محتوى المنتج */}
+            <div className="grid gap-6 p-5 sm:p-7 md:grid-cols-2">
+              {/* صورة المنتج */}
+              <div className="relative flex min-h-[250px] items-center justify-center overflow-hidden rounded-2xl bg-[#F4F7FA] sm:min-h-[320px]">
+                <Image
+                  src={selectedProduct.image}
+                  alt={selectedProduct.model}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  className="object-contain p-6"
+                />
+
+                <span className="absolute right-3 top-3 rounded-full bg-white px-3 py-1.5 text-xs font-bold text-[#2F80ED] shadow-sm">
+                  {selectedProduct.categoryTitle}
                 </span>
               </div>
-            </Link>
-          );
-        })}
-      </div>
-    </section>
+
+              {/* تفاصيل المنتج */}
+              <div className="flex flex-col justify-center">
+                <p className="text-xs font-bold text-[#2F80ED]">
+                  PRODUCT MODEL
+                </p>
+
+                <h3
+                  id="product-modal-title"
+                  className="mt-2 text-2xl font-black text-[#102A49] sm:text-3xl"
+                >
+                  {selectedProduct.model}
+                </h3>
+
+                <p className="mt-4 text-sm leading-8 text-slate-600">
+                  {selectedProduct.desc}
+                </p>
+
+                <div className="mt-5 space-y-3">
+                  {selectedProduct.flow && (
+                    <div className="flex items-center justify-between gap-3 rounded-xl bg-slate-50 p-4">
+                      <span className="text-xs text-slate-500">
+                        تدفق الهواء
+                      </span>
+
+                      <span className="text-sm font-black text-[#102A49]">
+                        {selectedProduct.flow}
+                      </span>
+                    </div>
+                  )}
+
+                  {selectedProduct.extra && (
+                    <div className="flex items-center justify-between gap-3 rounded-xl bg-slate-50 p-4">
+                      <span className="text-xs text-slate-500">
+                        المواصفات
+                      </span>
+
+                      <span className="text-sm font-bold text-[#102A49]">
+                        {selectedProduct.extra}
+                      </span>
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-between gap-3 rounded-xl bg-slate-50 p-4">
+                    <span className="text-xs text-slate-500">
+                      صفحة الكتالوج
+                    </span>
+
+                    <span className="text-sm font-black text-[#102A49]">
+                      {selectedProduct.page}
+                    </span>
+                  </div>
+                </div>
+
+                {/* الأزرار */}
+                <div className="mt-6 flex flex-row gap-3">
+                  <Link
+                    href={getProductHref(selectedProduct)}
+                    onClick={closeProduct}
+                    className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-[#102A49] px-3 py-3 text-center text-sm font-bold text-white transition hover:bg-[#2F80ED]"
+                  >
+                    عرض التفاصيل
+                    <ArrowLeft size={17} />
+                  </Link>
+
+                  <a
+                    href={getWhatsAppHref(selectedProduct)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl border border-slate-200 px-3 py-3 text-center text-sm font-bold text-slate-700 transition hover:border-green-500 hover:text-green-600"
+                  >
+                    <MessageCircle size={17} />
+                    طلب المنتج
+                  </a>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      )}
+    </>
   );
 }

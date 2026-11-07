@@ -3,9 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
   ArrowLeft,
-  Fan,
   Boxes,
-  ChevronLeft,
   ShieldCheck,
 } from "lucide-react";
 
@@ -14,6 +12,7 @@ import {
   categoriesOf,
   type GroupId,
 } from "@/data/products";
+
 import { Shell } from "@/components/site";
 import ProductGroupCatalog from "@/components/product-group-catalog";
 
@@ -62,46 +61,37 @@ export default async function ProductGroupPage({
     notFound();
   }
 
+  // جلب الفئات التابعة للقسم المحدد
   const categories = categoriesOf(groupIdTyped);
 
   const isIndustrial = groupIdTyped === "industrial";
 
-  const totalProducts = categories.reduce(
-    (total, category) =>
-      total + category.products.length,
-    0
-  );
-
   return (
     <Shell>
-      <main
-        className="min-h-screen bg-[#F5F8FC]"
-        dir="rtl"
-      >
-       
+      <main className="min-h-screen bg-[#F5F8FC]" dir="rtl">
 
-        {/* هيرو القسم */}
+        {/* Hero Section */}
         <section className="relative isolate overflow-hidden bg-[#061B30] text-white">
           <div
-  aria-hidden="true"
-  className="absolute inset-0 -z-10"
-  style={{
-    backgroundImage: `
-      linear-gradient(
-        90deg,
-        rgba(6, 27, 48, 0.72),
-        rgba(6, 27, 48, 0.90)
-      ),
-      url('${
-        isIndustrial
-          ? "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSHPQdfIfGmUFh9BHxkWjO3ICFrN0ORznv-KWucoC4FaRffvGjw"
-          : "https://supplyworldco.com/wp-content/uploads/2024/11/%D8%AA%D8%B1%D9%83%D9%8A%D8%A8-%D8%A7%D9%84%D9%88%D8%AD%D8%AF%D8%A7%D8%AA-%D8%A7%D9%84%D8%B1%D8%A6%D9%8A%D8%B3%D9%8A%D8%A9-1024x585.jpg"
-      }')
-    `,
-    backgroundPosition: "center",
-    backgroundSize: "cover",
-  }}
-/>
+            aria-hidden="true"
+            className="absolute inset-0 -z-10"
+            style={{
+              backgroundImage: `
+                linear-gradient(
+                  90deg,
+                  rgba(6, 27, 48, 0.72),
+                  rgba(6, 27, 48, 0.90)
+                ),
+                url('${
+                  isIndustrial
+                    ? "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSHPQdfIfGmUFh9BHxkWjO3ICFrN0ORznv-KWucoC4FaRffvGjw"
+                    : "https://supplyworldco.com/wp-content/uploads/2024/11/%D8%AA%D8%B1%D9%83%D9%8A%D8%A8-%D8%A7%D9%84%D9%88%D8%AD%D8%AF%D8%A7%D8%AA-%D8%A7%D9%84%D8%B1%D8%A6%D9%8A%D8%B3%D9%8A%D8%A9-1024x585.jpg"
+                }')
+              `,
+              backgroundPosition: "center",
+              backgroundSize: "cover",
+            }}
+          />
 
           <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-20">
             <span
@@ -127,18 +117,20 @@ export default async function ProductGroupPage({
             <div className="mt-7 flex flex-wrap gap-3">
               <span className="inline-flex items-center gap-2 rounded-lg border border-white/15 bg-white/10 px-4 py-3 text-sm font-bold">
                 <Boxes className="size-4" />
-                 فئات متخصصة
+                فئات متخصصة
               </span>
 
-             
+              <span className="inline-flex items-center gap-2 rounded-lg border border-white/15 bg-white/10 px-4 py-3 text-sm font-bold">
+                {categories.length} فئة
+              </span>
             </div>
           </div>
         </section>
 
-        {/* البحث والفلترة وعرض المنتجات */}
+        {/* Products: Search, Filters, Preview and Pagination */}
         <ProductGroupCatalog categories={categories} />
 
-        {/* شريط الدعم */}
+        {/* Support Section */}
         <section className="border-t border-slate-200 bg-white">
           <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-8 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
             <div className="flex items-start gap-3">
@@ -167,6 +159,7 @@ export default async function ProductGroupPage({
             </Link>
           </div>
         </section>
+
       </main>
     </Shell>
   );

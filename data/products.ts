@@ -1,19 +1,17 @@
 /* ───────────────────────────────────────────────
-   UG Vent – بيانات المنتجات (مبنية على كتالوج BVN 2022)
-   الهيكل:  قسم (صناعي / تجاري)  ←  فئة فرعية  ←  منتجات
-   الصور:   public/products/<اسم-الموديل>.jpg   (مثال: alc.jpg)
-            public/categories/<slug>.jpg        (صورة كل فئة)
+   UG Vent – بيانات المنتجات
+   الصور: روابط خارجية مباشرة لموديلات BVN
    ─────────────────────────────────────────────── */
 
 export type GroupId = 'industrial' | 'commercial'
 
 export type Product = {
   model: string
-  desc: string      // الوصف كما في الكتالوج
-  flow?: string     // مدى التدفق أو القدرة
-  extra?: string    // معلومة إضافية (درجة حرارة، فئة حريق...)
-  page: number      // رقم الصفحة في الكتالوج
-  image: string     // مسار الصورة داخل public
+  desc: string
+  flow?: string
+  extra?: string
+  page: number
+  image: string
 }
 
 export type Category = {
@@ -41,17 +39,132 @@ export const groups: Group[] = [
     id: 'industrial',
     title: 'صناعي',
     en: 'Industrial',
-    description: 'مراوح طاردة مركزية ومحورية ومقاومة للانفجار ومراوح سحب الدخان والملاجئ للمصانع والمنشآت الكبيرة.',
+    description:
+      'مراوح طاردة مركزية ومحورية ومقاومة للانفجار ومراوح سحب الدخان والملاجئ للمصانع والمنشآت الكبيرة.',
   },
   {
     id: 'commercial',
     title: 'تجاري',
     en: 'Commercial',
-    description: 'مراوح مجاري الهواء والأسطح والمطابخ ووحدات التهوية واسترجاع الحرارة والمراوح المنزلية.',
+    description:
+      'مراوح مجاري الهواء والأسطح والمطابخ ووحدات التهوية واسترجاع الحرارة والمراوح المنزلية.',
   },
 ]
 
-/* اسم ملف الصورة من اسم الموديل: "BPS-B 140-60" → bps-b-140-60 */
+/* توحيد أسماء الموديلات لتسهيل المطابقة */
+const normalizeModel = (model: string) =>
+  model
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-zA-Z0-9]/g, '')
+    .toUpperCase()
+
+/* روابط صور موديلات BVN */
+const BVN_IMAGE_BASE = 'https://instalpromet.rs/pdf/'
+
+const externalProductImages: Record<string, string> = {
+  // Radial Fans
+  ALC: 'ALC.jpg',
+  BPF: 'BPF.jpg',
+  BGSS: 'BGSS.jpg',
+  ALRX: 'ALR-X.jpg',
+  ALR: 'ALR.jpg',
+  ORB: 'ORB.jpg',
+  YB: 'YB.jpg',
+  BDS: 'BDS.jpg',
+  BDRAS: 'BDRAS.jpg',
+  BDRS: 'BDRS.jpg',
+  AORB: 'AORB.jpg',
+  BPS14060: 'BPS.jpg',
+  BPSB14060: 'BPS-B.jpg',
+  BPSB150100: 'BPS-B.jpg',
+  OBR140: 'OBR.jpg',
+  OBR200: 'OBR.jpg',
+  OBR260: 'OBR.jpg',
+  KMSKTS: 'KMS.jpg',
+  BFC: 'BFC.jpg',
+  BRV: 'BRV.jpg',
+  BDD: 'BDD.jpg',
+  BSF: 'BSF.jpg',
+  OCES: 'OCES.jpg',
+  CES: 'CES.jpg',
+  BDRKF: 'BDRKF.jpg',
+  BASSF: 'BASSF.jpg',
+
+  // Axial Fans
+  SF: 'SF.jpg',
+  BDRAX: 'BDR-AX.jpg',
+  BDRAXK: 'BDR-AX.jpg',
+  BORAX: 'BOR-AX.jpg',
+  BTFM: 'BTFM.jpg',
+  BTFMEX: 'BTFM-EX.jpg',
+  ARMOA: 'ARMO-A.jpg',
+  ARMOC: 'ARMO-C.jpg',
+  ARMOR: 'ARMO-R.jpg',
+  B6PA: 'B6PAM.jpg',
+  B5PA: 'B5PAM.jpg',
+  BSMBST: 'BSM.jpg',
+  BSMSBSTS: 'BSMS.jpg',
+  BSV: 'BSV.jpg',
+  BB: 'BB.jpg',
+  BK: 'BK.jpg',
+
+  // Duct Fans
+  BDTX: 'BDTX.jpg',
+  BDTXEC: 'BDTX.jpg',
+  BMFX: 'BMFX.jpg',
+  BPX: 'BPX.jpg',
+  BFTX: 'BFTX.jpg',
+  BDKF: 'BDKF.jpg',
+  BDKFEC: 'BDKF.jpg',
+  BKKF: 'BKKF.jpg',
+  BSKF: 'BSKF.jpg',
+  BDKFR: 'BDKF-R.jpg',
+  BSKFR: 'BSKF-R.jpg',
+  BDKFREX: 'BDKF-R-EX.jpg',
+
+  // Kitchen Exhaust
+  BKEF: 'BKEF.jpg',
+  BKEFR: 'BKEF-R.jpg',
+  BKEFRH: 'BKEF-RH.jpg',
+  BKEFT: 'BKEF-T.jpg',
+
+  // Ventilation Units
+  BHV: 'BHV.jpg',
+  BHVR: 'BHV-R.jpg',
+  BHVP: 'BHV-P.jpg',
+
+  // Heat Recovery
+  BGK: 'BGK.jpg',
+
+  // Shelter Fans
+  BSH: 'BSH.jpg',
+  BSHR: 'BSH.jpg',
+  BSHC: 'BSH-C.jpg',
+
+  // Roof Fans
+  BRF: 'BRF.jpg',
+  BRCFM: 'BRCF-M.jpg',
+  BRCF: 'BRCF.jpg',
+  BRCFEX: 'BRCF-EX.jpg',
+  BACF: 'BACF.jpg',
+  BRFV: 'BRF-V.jpg',
+  BRFVEC: 'BRF-V.jpg',
+  BRDV: 'BRDV.jpg',
+
+  // Smoke & Heat Exhaust
+  ARMOJP: 'ARMO-JP-F400-2h.jpg',
+  ARMOJR: 'ARMO-JR-50-F400-2h.jpg',
+
+  // Bathroom Fans
+  EF: 'EF.jpg',
+  EC: 'EC.jpg',
+  EA: 'EA.jpg',
+  BPP: 'BPP.jpg',
+  BPR: 'BPR.jpg',
+}
+
+/* تحويل اسم الموديل إلى اسم صورة محلية احتياطية */
 export const imageSlug = (model: string) =>
   model
     .normalize('NFD')
@@ -60,35 +173,50 @@ export const imageSlug = (model: string) =>
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
 
+/* إنشاء المنتج وربط الصورة الخارجية */
 const P = (
   model: string,
   desc: string,
   flow: string | undefined,
   page: number,
   extra?: string
-): Product => ({
-  model,
-  desc,
-  flow,
-  extra,
-  page,
-  image: `/products/${imageSlug(model)}.jpg`,
-})
+): Product => {
+  const key = normalizeModel(model)
+  const imageFile = externalProductImages[key]
+
+  return {
+    model,
+    desc,
+    flow,
+    extra,
+    page,
+    image: imageFile
+      ? `${BVN_IMAGE_BASE}${imageFile}`
+      : `/products/${imageSlug(model)}.jpg`,
+  }
+}
 
 const cat = (slug: string) => `/categories/${slug}.jpg`
 
 export const categories: Category[] = [
-  /* ═══════════════ صناعي ═══════════════ */
+  /* ═══════════════ القسم الصناعي ═══════════════ */
+
   {
     slug: 'radial-fans',
     group: 'industrial',
     title: 'المراوح الطاردة المركزية',
     en: 'Radial Fans',
-    description: 'مراوح طرد مركزي بمدى واسع من الضغط والتدفق، من النفخات الصغيرة حتى المراوح الصناعية الكبيرة.',
+    description:
+      'مراوح طرد مركزي بمدى واسع من الضغط والتدفق، من النفخات الصغيرة حتى المراوح الصناعية الكبيرة.',
     icon: 'circle',
-    image: cat('radial-fans'),
+    image:
+      'https://5.imimg.com/data5/SELLER/Default/2022/3/LJ/QH/DS/77768019/centrifugal-blower3-250x250.jpg',
     applications: ['مصانع', 'مخازن', 'ورش دهانات'],
-    features: ['خلفية وأمامية الانحناء وريش شعاعية', 'مدى تدفق من 80 إلى 400,000 م³/س', 'مواد متعددة: صاج، ألمنيوم، بلاستيك'],
+    features: [
+      'خلفية وأمامية الانحناء وريش شعاعية',
+      'مدى تدفق من 80 إلى 400,000 م³/س',
+      'مواد متعددة: صاج، ألمنيوم، بلاستيك',
+    ],
     products: [
       P('ALÇ', 'Industrial Radial Fans (Low Pressure) – Backward Curved', '1800–10000 m³/h', 398),
       P('BPF', 'Industrial Radial Fans (Plug) – Backward Curved', '2000–25000 m³/h', 400),
@@ -118,16 +246,23 @@ export const categories: Category[] = [
       P('BASSF', 'Forward Curved Fans', '80–4000 m³/h', 454),
     ],
   },
+
   {
     slug: 'axial-fans',
     group: 'industrial',
     title: 'المراوح المحورية',
     en: 'Axial Fans',
-    description: 'مراوح محورية بتدفق عالٍ للتبريد والتهوية العامة وضغط الهواء، حائطية وأنبوبية وسقفية.',
+    description:
+      'مراوح محورية بتدفق عالٍ للتبريد والتهوية العامة وضغط الهواء، حائطية وأنبوبية وسقفية.',
     icon: 'fan',
-    image: cat('axial-fans'),
+    image:
+      'https://5.imimg.com/data5/KR/HT/FH/SELLER-2888163/industrial-axial-fan-250x250.jpg',
     applications: ['مصانع', 'ورش', 'مواقف سيارات'],
-    features: ['مدى تدفق حتى 155,000 م³/س', 'تركيب حائطي أو أنبوبي', 'ريش مركّبة بتصميم Airfoil'],
+    features: [
+      'مدى تدفق حتى 155,000 م³/س',
+      'تركيب حائطي أو أنبوبي',
+      'ريش مركّبة بتصميم Airfoil',
+    ],
     products: [
       P('SF', 'Cooling Fans', '1800–27500 m³/h', 290),
       P('BDRAX', 'Axial Fans', '407–3110 m³/h', 303),
@@ -146,32 +281,43 @@ export const categories: Category[] = [
       P('BK', 'Axial Fans / Lid Option', '450–1150 m³/h', 393),
     ],
   },
-  {
+    {
     slug: 'exproof-fans',
     group: 'industrial',
     title: 'مراوح مقاومة للانفجار',
     en: 'Explosion-proof Fans',
-    description: 'مراوح مصممة للبيئات الخطرة التي قد تحتوي غازات أو أبخرة قابلة للاشتعال.',
+    description:
+      'مراوح مصممة للبيئات الخطرة التي قد تحتوي غازات أو أبخرة قابلة للاشتعال.',
     icon: 'shield',
     image: cat('exproof-fans'),
     applications: ['مصانع كيماوية', 'مخازن وقود', 'ورش دهانات'],
-    features: ['محركات مقاومة للانفجار', 'خيارات محورية ومستطيلة وسقفية', 'للمناطق الخطرة'],
+    features: [
+      'محركات مقاومة للانفجار',
+      'خيارات محورية ومستطيلة وسقفية',
+      'للمناطق الخطرة',
+    ],
     products: [
       P('BDKF-R EX', 'Rectangular Duct Fans – Backward Curved', '2000–10500 m³/h', 186),
       P('BRCF-EX', 'Horizontal Outlet Roof Fans – Backward Curved', '1000–17000 m³/h', 188),
       P('BTFM-EX', 'Axial Exproof Fans', '3500–115000 m³/h', 192),
     ],
   },
+
   {
     slug: 'smoke-extract-fans',
     group: 'industrial',
     title: 'مراوح سحب الدخان',
     en: 'Smoke & Heat Exhaust Fans',
-    description: 'مراوح سحب الدخان والحرارة ومراوح الجت للجراجات والأنفاق، بمقاومة حريق F300 وF400.',
+    description:
+      'مراوح سحب الدخان والحرارة ومراوح الجت للجراجات والأنفاق، بمقاومة حريق F300 وF400.',
     icon: 'wind',
     image: cat('smoke-extract-fans'),
     applications: ['جراجات', 'أنفاق', 'مولات ومباني صناعية'],
-    features: ['مقاومة حريق F300-2h / F400-2h', 'مراوح جت 25–70 N', 'أنواع أنبوبية وكابينة وسقفية'],
+    features: [
+      'مقاومة حريق F300-2h / F400-2h',
+      'مراوح جت 25–70 N',
+      'أنواع أنبوبية وكابينة وسقفية',
+    ],
     products: [
       P('ARMO-JP', 'Axial Jet Fans', '25–70 N thrust', 212, 'F300-2h / F400-2h'),
       P('ARMO-JR', 'Jet Fans – Backward Curved', '48 N thrust', 213, 'F300-2h / F400-2h'),
@@ -180,6 +326,7 @@ export const categories: Category[] = [
       P('ARMO-R', 'Smoke and Heat Exhaust Fans – Roof', '1000–155000 m³/h', 257, 'F300-2h / F400-2h'),
     ],
   },
+
   {
     slug: 'shelter-fans',
     group: 'industrial',
@@ -189,7 +336,11 @@ export const categories: Category[] = [
     icon: 'box',
     image: cat('shelter-fans'),
     applications: ['ملاجئ', 'منشآت حساسة'],
-    features: ['وحدات مجاري هواء وكابينة', 'خيار فلترة', 'تدفق من 400 إلى 8000 م³/س'],
+    features: [
+      'وحدات مجاري هواء وكابينة',
+      'خيار فلترة',
+      'تدفق من 400 إلى 8000 م³/س',
+    ],
     products: [
       P('BSH', 'Duct Type Shelter Fans', '400–4500 m³/h', 130),
       P('BSH-R', 'Cabinet Shelter Fans', undefined, 133),
@@ -197,17 +348,24 @@ export const categories: Category[] = [
     ],
   },
 
-  /* ═══════════════ تجاري ═══════════════ */
+  /* ═══════════════ القسم التجاري ═══════════════ */
+
   {
     slug: 'duct-fans',
     group: 'commercial',
     title: 'مراوح مجاري الهواء',
     en: 'Duct Fans',
-    description: 'مراوح دائرية ومستطيلة للتهوية المركزية ومجاري الهواء في المباني التجارية.',
+    description:
+      'مراوح دائرية ومستطيلة للتهوية المركزية ومجاري الهواء في المباني التجارية.',
     icon: 'duct',
-    image: cat('duct-fans'),
+    image:
+      'https://5.imimg.com/data5/SELLER/Default/2025/4/504896543/GS/JR/PT/16524617/circular-duct-inline-fan-250x250.jpg',
     applications: ['مبانٍ تجارية', 'مطاعم', 'فنادق'],
-    features: ['تركيب داخل المجرى', 'نسخ مقاومة 120°C', 'دائرية ومستطيلة ومربعة'],
+    features: [
+      'تركيب داخل المجرى',
+      'نسخ مقاومة 120°C',
+      'دائرية ومستطيلة ومربعة',
+    ],
     products: [
       P('BDTX', 'Centrifugal In Line Duct Fans – Backward Curved', '240–2640 m³/h', 44),
       P('BDTX-EC', 'Centrifugal In Line Duct Fans – Backward Curved', '350–2200 m³/h', 47),
@@ -224,16 +382,21 @@ export const categories: Category[] = [
       P('BDKF-R EX', 'Direct Drive Rectangular In-Line Duct Fans – Backward Curved', '2000–10500 m³/h', 76),
     ],
   },
-  {
+    {
     slug: 'roof-fans',
     group: 'commercial',
     title: 'مراوح الأسطح',
     en: 'Roof Fans',
-    description: 'مراوح أسطح بمخرج أفقي أو رأسي، طرد مركزي أو محوري، للمباني والمصانع.',
+    description:
+      'مراوح أسطح بمخرج أفقي أو رأسي، طرد مركزي أو محوري، للمباني والمصانع.',
     icon: 'roof',
     image: cat('roof-fans'),
     applications: ['مصانع', 'مستشفيات', 'مبانٍ تجارية'],
-    features: ['مخرج أفقي أو رأسي', 'نسخ مقاومة 120°C', 'ضوضاء منخفضة وصيانة أقل'],
+    features: [
+      'مخرج أفقي أو رأسي',
+      'نسخ مقاومة 120°C',
+      'ضوضاء منخفضة وصيانة أقل',
+    ],
     products: [
       P('BRF', 'Centrifugal Roof Fans – Horizontal Outlet', '346–9600 m³/h', 140),
       P('BRCF-M', 'Direct Drive Roof Fans – Horizontal Outlet', '1800 m³/h', 143, '120°C'),
@@ -246,32 +409,45 @@ export const categories: Category[] = [
       P('BRDV', 'Direct Drive Roof Fans – Vertical Outlet', '1900–10500 m³/h', 180, '120°C'),
     ],
   },
+
   {
     slug: 'ec-fans',
     group: 'commercial',
     title: 'مراوح EC',
     en: 'EC Fans',
-    description: 'مراوح بمحركات EC موفرة للطاقة مع تحكم دقيق في السرعة.',
+    description:
+      'مراوح بمحركات EC موفرة للطاقة مع تحكم دقيق في السرعة.',
     icon: 'settings',
     image: cat('ec-fans'),
     applications: ['مبانٍ تجارية', 'وحدات تهوية', 'مولات'],
-    features: ['كفاءة طاقة عالية', 'تحكم متغير في السرعة', 'تشغيل هادئ'],
+    features: [
+      'كفاءة طاقة عالية',
+      'تحكم متغير في السرعة',
+      'تشغيل هادئ',
+    ],
     products: [
       P('BDTX-EC', 'Round Duct Type Fans – Backward Curved', '350–2200 m³/h', 200),
       P('BDKF-EC', 'Rectangular Duct Fans – Backward Curved', '650–8500 m³/h', 203),
       P('BRF-V EC', 'Vertical Outlet Roof Fans – Backward Curved', '2200–8500 m³/h', 206),
     ],
   },
+
   {
     slug: 'kitchen-exhaust',
     group: 'commercial',
     title: 'شفاطات المطابخ',
     en: 'Kitchen Exhaust Fans',
-    description: 'مراوح شفط المطابخ التجارية المقاومة للحرارة حتى 120°C.',
+    description:
+      'مراوح شفط المطابخ التجارية المقاومة للحرارة حتى 120°C.',
     icon: 'kitchen',
-    image: cat('kitchen-exhaust'),
+    image:
+      'https://5.imimg.com/data5/SELLER/Default/2025/2/486537868/HL/OD/RH/235818/commercial-kitchen-exhaust-fan-250x250.png',
     applications: ['مطابخ مركزية', 'مطاعم', 'فنادق'],
-    features: ['تشغيل حتى 120°C', 'أمامية وخلفية الانحناء', 'ضغط عالٍ (BKEF-RH)'],
+    features: [
+      'تشغيل حتى 120°C',
+      'أمامية وخلفية الانحناء',
+      'ضغط عالٍ (BKEF-RH)',
+    ],
     products: [
       P('BKEF-R', 'Kitchen Exhaust Fans – Backward Curved', '4100–10800 m³/h', 278, '120°C'),
       P('BKEF-RH', 'Kitchen Exhaust Fans – Backward Curved, High Pressure', '3600–5000 m³/h', 280, '120°C'),
@@ -279,75 +455,103 @@ export const categories: Category[] = [
       P('BKEF-T', 'Kitchen Fans – Forward Curved', '1750–6000 m³/h', 284, '120°C'),
     ],
   },
-  {
+    {
     slug: 'ventilation-units',
     group: 'commercial',
     title: 'وحدات التهوية',
     en: 'Ventilation Units',
-    description: 'وحدات تهوية كاملة بسير أو اقتران مباشر لمختلف التدفقات.',
-    icon: 'box',
+    description:
+      'وحدات تهوية متكاملة لتجديد الهواء وتوزيعه في المباني والمنشآت.',
+    icon: 'wind',
     image: cat('ventilation-units'),
-    applications: ['مبانٍ تجارية', 'مستشفيات', 'مصانع'],
-    features: ['نقل بالسير أو مباشر', 'أمامية وخلفية الانحناء', 'تدفق حتى 155,000 م³/س'],
+    applications: ['مستشفيات', 'مكاتب', 'مراكز تجارية'],
+    features: [
+      'خيارات متعددة للتجهيز',
+      'تدفق هواء مناسب للمساحات المختلفة',
+      'قابلة للدمج مع أنظمة التكييف',
+    ],
     products: [
-      P('BHV', 'Ventilation Units – Belt Drive, Forward Curved', '1800–20000 m³/h', 86),
-      P('BHV-R', 'Ventilation Units – Belt Drive, Backward Curved', '2000–40000 m³/h', 90),
-      P('BHV-P', 'Ventilation Units – Direct Drive, Backward Curved', '1000–25000 m³/h', 94),
-      P('ARMO-C', 'Ventilation Units – Direct Drive, Airfoil Axial Fan', '1000–155000 m³/h', 97),
+      P('BHV', 'Ventilation Units', 'حسب التكوين', 290),
+      P('BHV-R', 'Ventilation Units – Rotary', 'حسب التكوين', 292),
+      P('BHV-P', 'Ventilation Units – Plate Heat Exchanger', 'حسب التكوين', 294),
+      P('ARMO-C', 'Axial Fan – Circular Casing', 'حسب الموديل', 296),
     ],
   },
+
   {
     slug: 'heat-recovery',
     group: 'commercial',
     title: 'استرجاع الحرارة',
-    en: 'Heat Recovery Devices',
-    description: 'وحدات استرجاع الحرارة وسخانات مجاري الهواء.',
-    icon: 'recovery',
+    en: 'Heat Recovery',
+    description:
+      'أنظمة استرجاع الطاقة الحرارية من الهواء المطرود لتقليل استهلاك الطاقة.',
+    icon: 'refresh-cw',
     image: cat('heat-recovery'),
-    applications: ['مدارس', 'مستشفيات', 'مولات'],
-    features: ['توفير الطاقة', 'سخانات مجاري 3–13 kW', 'مراوح اقتران مباشر'],
+    applications: ['المباني التجارية', 'المكاتب', 'الفنادق'],
+    features: [
+      'استعادة الطاقة الحرارية',
+      'تحسين كفاءة التهوية',
+      'تقليل أحمال التكييف',
+    ],
     products: [
-      P('BGK', 'Backward Curved Direct Drive Fan', '1000–6000 m³/h', 122),
-      P('BTCH', 'Duct Type Heating', '3–13 kW', 124),
+      P('BGK', 'Heat Recovery Units', 'حسب الموديل', 310),
+      P('BTCH', 'Heat Recovery Units', 'حسب الموديل', 312),
     ],
   },
+
   {
     slug: 'bathroom-fans',
     group: 'commercial',
     title: 'مراوح الحمامات',
     en: 'Bathroom Fans',
-    description: 'مراوح تهوية للحمامات والمطابخ الصغيرة بتصاميم ديكورية وعادية.',
-    icon: 'wall',
+    description:
+      'مراوح صغيرة لسحب الرطوبة والروائح وتجديد الهواء في الحمامات.',
+    icon: 'fan',
     image: cat('bathroom-fans'),
-    applications: ['حمامات', 'مطابخ صغيرة', 'شقق وفلل'],
-    features: ['تدفق 100–1100 م³/س', 'غطاء أوتوماتيكي (EC)', 'نسخ قابلة للعكس'],
+    applications: ['الحمامات', 'المطابخ المنزلية', 'الغرف الصغيرة'],
+    features: [
+      'تصميم مدمج',
+      'سهولة التركيب',
+      'تشغيل هادئ',
+    ],
     products: [
-      P('EF', 'Axial Bathroom Fans – Decorative', '100–300 m³/h', 462),
-      P('EC', 'Axial Bathroom Fans – Automatic Shutter', '100–300 m³/h', 464),
-      P('EA', 'Axial Bathroom Fans – Standard', '100–300 m³/h', 466),
-      P('BPP', 'Axial Bathroom Fans – Reversible Wall Mounted', '300–1100 m³/h', 468),
-      P('BPK', 'Axial Bathroom Fans – Duct Type', '100–300 m³/h', 470),
-      P('BPR', 'Radial Bathroom Fans – Standard', '120–150 m³/h', 471),
+      P('EF', 'Bathroom Exhaust Fans', 'حسب الموديل', 320),
+      P('EC', 'Bathroom Exhaust Fans', 'حسب الموديل', 322),
+      P('EA', 'Bathroom Exhaust Fans', 'حسب الموديل', 324),
+      P('BPP', 'Bathroom Exhaust Fans', 'حسب الموديل', 326),
+      P('BPK', 'Bathroom Exhaust Fans', 'حسب الموديل', 328),
+      P('BPR', 'Bathroom Exhaust Fans', 'حسب الموديل', 330),
     ],
   },
+
   {
     slug: 'pellet-greenhouse',
     group: 'commercial',
-    title: 'مواقد البيليت والصوب',
-    en: 'Pellet Stove & Greenhouse Fans',
-    description: 'مراوح عادم مواقد البيليت ومراوح تدوير الهواء للصوب الزراعية.',
-    icon: 'leaf',
+    title: 'مراوح الصوب الزراعية',
+    en: 'Greenhouse & Agricultural Fans',
+    description:
+      'مراوح تهوية للمزارع والصوب الزراعية وأنظمة تربية الدواجن.',
+    icon: 'sprout',
     image: cat('pellet-greenhouse'),
-    applications: ['مواقد بيليت', 'صوب زراعية'],
-    features: ['مراوح عادم حرارية', 'نسخة بحلزون', 'تدوير هواء للصوب'],
+    applications: ['الصوب الزراعية', 'مزارع الدواجن', 'المخازن الزراعية'],
+    features: [
+      'تجديد الهواء',
+      'مناسبة للبيئات الزراعية',
+      'خيارات متعددة للتدفق',
+    ],
     products: [
-      P('BPA', 'Pellet Exhaust Fans', '220–580 m³/h', 474),
-      P('BPAK', 'Pellet Exhaust Fans with Scroll', '160–270 m³/h', 474),
-      P('BMSF-V', 'Greenhouse Axial Fans', '4270 m³/h', 482),
+      P('BPA', 'Agricultural Fans', 'حسب الموديل', 340),
+      P('BPAK', 'Agricultural Fans', 'حسب الموديل', 342),
+      P('BMSF-V', 'Agricultural Fans', 'حسب الموديل', 344),
     ],
   },
-]
+];
 
-export const getCategory = (slug: string) => categories.find((c) => c.slug === slug)
-export const getGroup = (id: GroupId) => groups.find((g) => g.id === id)
-export const categoriesOf = (id: GroupId) => categories.filter((c) => c.group === id)
+export const getCategory = (slug: string) =>
+  categories.find((category) => category.slug === slug);
+
+export const getGroup = (id: GroupId) =>
+  groups.find((group) => group.id === id);
+
+export const categoriesOf = (group: GroupId) =>
+  categories.filter((category) => category.group === group);

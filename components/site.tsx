@@ -15,7 +15,22 @@ import {
   House,
   Building2,
   Package,
+  Info,
+  Flame,
+  Wrench,
+  FolderKanban,
 } from "lucide-react";
+
+const navIcons = [
+  House,
+  Info,
+  Fan,
+  Flame,
+  Building2,
+  Wrench,
+  FolderKanban,
+  Phone,
+];
 import { FaWhatsapp } from "react-icons/fa";
 import { categories } from "@/data/products";
 
@@ -201,18 +216,18 @@ function MobileBottomNav() {
                     }`}
                   >
                     <span className="flex items-center gap-3">
-                      <span
-                        className={`grid size-8 place-items-center rounded-lg text-xs ${
-                          selected
-                            ? "bg-[#2F80ED] text-white"
-                            : "bg-slate-100 text-slate-500"
-                        }`}
-                      >
-                        {String(index + 1).padStart(2, "0")}
-                      </span>
+  <span
+    className={`grid size-8 place-items-center rounded-lg text-xs ${
+      selected
+        ? "bg-[#2F80ED] text-white"
+        : "bg-slate-100 text-slate-500"
+    }`}
+  >
+    {String(index + 1).padStart(2, "0")}
+  </span>
 
-                      {label}
-                    </span>
+  {label}
+</span>
 
                     {selected && (
                       <span className="size-2 rounded-full bg-[#2F80ED]" />
