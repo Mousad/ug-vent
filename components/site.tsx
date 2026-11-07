@@ -239,13 +239,15 @@ function MobileBottomNav() {
           </div>
 
           <div className="mt-auto p-5">
-            <Link
-              href="/contact"
-              onClick={() => setOpen(false)}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0B3C6F] px-5 py-4 text-sm font-bold text-white transition hover:bg-[#2F80ED]"
-            >
-              اطلب عرض سعر
-            </Link>
+            <a
+  href={`https://wa.me/201008404000?text=${encodeURIComponent("مرحباً، أريد طلب عرض سعر.")}`}
+  target="_blank"
+  rel="noopener noreferrer"
+  className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#0B3C6F] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-[#2F80ED]"
+>
+  <FaWhatsapp size={19} />
+  اطلب  
+</a>
 
             <p className="mt-4 text-center text-xs text-slate-400">
               Integrated Industrial Ventilation Systems
@@ -365,12 +367,15 @@ export function Header() {
           </nav>
 
           <div className="flex shrink-0 items-center gap-3">
-            <Link
-              href="/contact"
-              className="rounded-lg bg-[#0B3C6F] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-[#2F80ED]"
-            >
-              اطلب عرض سعر
-            </Link>
+          <a
+  href={`https://wa.me/201008404000?text=${encodeURIComponent("مرحباً، أريد طلب عرض سعر.")}`}
+  target="_blank"
+  rel="noopener noreferrer"
+  className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#0B3C6F] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-[#2F80ED]"
+>
+  <FaWhatsapp size={19} />
+  اطلب  
+</a>
 
             <button
               type="button"

@@ -10,10 +10,11 @@ import {
   ArrowRight,
   ChevronDown,
   Fan,
-  MessageCircle,
+
   Search,
   X,
 } from "lucide-react";
+import { FaWhatsapp } from "react-icons/fa";
 
 import { categories, imageSlug } from "@/data/products";
 import type { Category } from "@/data/products";
@@ -127,10 +128,10 @@ ${product.extra ? `المواصفات: ${product.extra}` : ""}
 
   return (
     <>
-      <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+      <section className="mx-auto max-w-7xl bg-white px-4 py-10 sm:px-6 lg:px-8">
 
         {/* البحث والفلترة */}
-        <div className="mb-8 w-full">
+        <div className="mb-8 w-full ">
           <div className="flex items-end gap-2 sm:gap-3">
 
             {/* البحث */}
@@ -201,12 +202,7 @@ ${product.extra ? `المواصفات: ${product.extra}` : ""}
 
           {/* عدد النتائج ومسح الفلاتر */}
           <div className="mt-3 flex items-center justify-between">
-            <p className="text-xs text-slate-500">
-              عدد المنتجات:
-              <span className="mr-1 font-black text-[#102A49]">
-                {filteredProducts.length}
-              </span>
-            </p>
+          
 
             {(search || selectedCategory !== "all") && (
               <button
@@ -224,27 +220,23 @@ ${product.extra ? `المواصفات: ${product.extra}` : ""}
         {/* عنوان المنتجات */}
         <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
           <div>
-            <p className="text-xs font-bold tracking-widest text-[#2F80ED]">
-              UG VENT PRODUCTS
-            </p>
+          
 
             <h2 className="mt-2 text-2xl font-black text-[#102A49]">
-              جميع المنتجات
+               المنتجات
             </h2>
           </div>
 
-          <p className="text-sm text-slate-500">
-            الصفحة {safePage} من {totalPages}
-          </p>
+        
         </div>
 
         {/* شبكة المنتجات */}
         {paginatedProducts.length > 0 ? (
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-2 gap-2 bg-white sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
             {paginatedProducts.map((product, index) => (
               <article
                 key={`${product.categorySlug}-${product.model}-${index}`}
-                className="group overflow-hidden rounded-2xl border border-slate-200 bg-white transition duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl"
+                className="group overflow-hidden rounded-[5px] border border-slate-200 bg-white transition duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl"
               >
                 <button
                   type="button"
@@ -253,7 +245,7 @@ ${product.extra ? `المواصفات: ${product.extra}` : ""}
                   className="block w-full text-right"
                 >
                   {/* صورة المنتج */}
-                  <div className="relative flex h-40 items-center justify-center overflow-hidden bg-[#F5F7FA] p-3 sm:h-52 sm:p-5">
+                  <div className="relative flex h-47 items-center justify-center overflow-hidden  p-3 sm:h-52 sm:p-5">
                     <Image
                       src={product.image}
                       alt={product.model}
@@ -262,9 +254,7 @@ ${product.extra ? `المواصفات: ${product.extra}` : ""}
                       className="object-contain p-4 transition duration-500 group-hover:scale-105 sm:p-5"
                     />
 
-                    <span className="absolute right-2 top-2 max-w-[85%] truncate rounded-full bg-white/95 px-2 py-1 text-[9px] font-bold text-[#2F80ED] shadow-sm sm:right-3 sm:top-3 sm:px-3 sm:text-[10px]">
-                      {product.categoryTitle}
-                    </span>
+                 
                   </div>
 
                   {/* بيانات المنتج */}
@@ -279,9 +269,7 @@ ${product.extra ? `المواصفات: ${product.extra}` : ""}
 
                     {product.flow && (
                       <div className="mt-3 flex flex-col gap-1 border-t border-slate-100 pt-3 sm:mt-4 sm:flex-row sm:items-center sm:justify-between">
-                        <span className="text-[10px] text-slate-400 sm:text-xs">
-                          تدفق الهواء
-                        </span>
+                       
 
                         <span className="text-[10px] font-bold text-[#102A49] sm:text-xs">
                           {product.flow}
@@ -292,16 +280,7 @@ ${product.extra ? `المواصفات: ${product.extra}` : ""}
                 </button>
 
                 {/* زر المعاينة */}
-                <div className="px-3 pb-3 sm:px-4 sm:pb-4">
-                  <button
-                    type="button"
-                    onClick={() => openProduct(product)}
-                    className="flex min-h-9 w-full items-center justify-center gap-1 rounded-lg bg-slate-100 px-2 py-2 text-[10px] font-bold text-[#102A49] transition hover:bg-blue-50 hover:text-[#2F80ED] sm:min-h-10 sm:gap-2 sm:text-xs"
-                  >
-                    معاينة المنتج
-                    <ChevronDown size={14} />
-                  </button>
-                </div>
+               
               </article>
             ))}
           </div>
@@ -414,9 +393,7 @@ ${product.extra ? `المواصفات: ${product.extra}` : ""}
             {/* رأس النافذة */}
             <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-100 bg-white/95 px-5 py-4 backdrop-blur">
               <div>
-                <p className="text-[10px] font-bold tracking-widest text-[#2F80ED]">
-                  UG VENT / PRODUCT PREVIEW
-                </p>
+             
 
                 <h2 className="mt-1 text-base font-black text-[#102A49]">
                   معاينة المنتج
@@ -436,7 +413,7 @@ ${product.extra ? `المواصفات: ${product.extra}` : ""}
             {/* محتوى المنتج */}
             <div className="grid gap-6 p-5 sm:p-7 md:grid-cols-2">
               {/* صورة المنتج */}
-              <div className="relative flex min-h-[250px] items-center justify-center overflow-hidden rounded-2xl bg-[#F4F7FA] sm:min-h-[320px]">
+              <div className="relative flex min-h-[250px] items-center justify-center overflow-hidden rounded-2xl  sm:min-h-[320px]">
                 <Image
                   src={selectedProduct.image}
                   alt={selectedProduct.model}
@@ -445,9 +422,7 @@ ${product.extra ? `المواصفات: ${product.extra}` : ""}
                   className="object-contain p-6"
                 />
 
-                <span className="absolute right-3 top-3 rounded-full bg-white px-3 py-1.5 text-xs font-bold text-[#2F80ED] shadow-sm">
-                  {selectedProduct.categoryTitle}
-                </span>
+              
               </div>
 
               {/* تفاصيل المنتج */}
@@ -508,21 +483,21 @@ ${product.extra ? `المواصفات: ${product.extra}` : ""}
                   <Link
                     href={getProductHref(selectedProduct)}
                     onClick={closeProduct}
-                    className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-[#102A49] px-3 py-3 text-center text-sm font-bold text-white transition hover:bg-[#2F80ED]"
+                    className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-[4px] bg-[#102A49] px-3 py-3 text-center text-sm font-bold text-white transition "
                   >
                     عرض التفاصيل
                     <ArrowLeft size={17} />
                   </Link>
 
                   <a
-                    href={getWhatsAppHref(selectedProduct)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl border border-slate-200 px-3 py-3 text-center text-sm font-bold text-slate-700 transition hover:border-green-500 hover:text-green-600"
-                  >
-                    <MessageCircle size={17} />
-                    طلب المنتج
-                  </a>
+  href={getWhatsAppHref(selectedProduct)}
+  target="_blank"
+  rel="noopener noreferrer"
+  className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-[4px] border border-green-200 px-3 py-3 text-center text-sm font-bold text-green-600 transition hover:bg-green-50"
+>
+  <FaWhatsapp size={20} />
+  اطلب  
+</a>
                 </div>
               </div>
             </div>
